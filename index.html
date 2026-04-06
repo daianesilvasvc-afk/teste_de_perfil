@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleção SDR — Podium Educação</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #111; --white: #fafaf8; --gray-100: #f4f3f0; --gray-200: #e8e7e2;
+    --gray-400: #999890; --gray-600: #666560; --red: #8b1a1a; --accent: #c8430a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); min-height: 100vh; }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--gray-200);
+    background: var(--white); position: sticky; top: 0; z-index: 100;
+  }
+  .nav-brand { font-family: 'DM Serif Display', serif; font-size: 18px; }
+  .nav-brand span { color: var(--accent); }
+
+  .test-wrap { max-width: 640px; margin: 0 auto; padding: 48px 24px 80px; }
+  .test-header { margin-bottom: 40px; }
+  .test-header h1 { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1.2; margin-bottom: 10px; }
+  .test-header p { font-size: 15px; color: var(--gray-600); line-height: 1.7; }
+
+  .progress-bar-wrap { margin-bottom: 36px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-400); margin-bottom: 8px; }
+  .progress-track { height: 3px; background: var(--gray-200); border-radius: 2px; }
+  .progress-fill { height: 3px; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .info-card { background: var(--gray-100); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+  .info-card h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .info-card p { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+
+  .field-group { margin-bottom: 18px; }
+  .field-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .field-group input {
+    width: 100%; padding: 11px 14px; border: 1px solid var(--gray-200);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--white); color: var(--black); transition: border-color 0.15s;
+  }
+  .field-group input:focus { outline: none; border-color: var(--black); }
+
+  .q-block { margin-bottom: 36px; }
+  .q-section-tag { display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+  .q-title { font-family: 'DM Serif Display', serif; font-size: 21px; line-height: 1.35; margin-bottom: 18px; }
+  .q-subtitle { font-size: 13px; color: var(--gray-600); margin-bottom: 18px; margin-top: -10px; }
+
+  .options-grid { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+    border: 1px solid var(--gray-200); border-radius: 10px; cursor: pointer;
+    background: var(--white); text-align: left; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--black); line-height: 1.5; transition: all 0.12s;
+  }
+  .opt-btn:hover { border-color: var(--black); }
+  .opt-btn.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+  .opt-letter { font-size: 11px; font-weight: 500; color: var(--gray-400); min-width: 18px; padding-top: 1px; }
+
+  .scale-wrap { padding: 8px 0; }
+  .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-400); margin-bottom: 10px; }
+  .scale-options { display: flex; gap: 8px; }
+  .scale-opt {
+    flex: 1; height: 44px; border: 1px solid var(--gray-200); border-radius: 8px;
+    cursor: pointer; background: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--gray-600); transition: all 0.12s;
+  }
+  .scale-opt:hover { border-color: var(--black); color: var(--black); }
+  .scale-opt.selected { background: var(--black); color: var(--white); border-color: var(--black); }
+
+  .q-textarea {
+    width: 100%; min-height: 120px; padding: 14px; border: 1px solid var(--gray-200);
+    border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--black); line-height: 1.6; resize: vertical; background: var(--white); transition: border-color 0.15s;
+  }
+  .q-textarea:focus { outline: none; border-color: var(--black); }
+
+  .btn-row { display: flex; gap: 10px; justify-content: space-between; margin-top: 32px; align-items: center; }
+  .btn-primary {
+    padding: 13px 28px; background: var(--black); color: var(--white); border: none;
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-back {
+    padding: 13px 20px; background: transparent; color: var(--gray-600);
+    border: 1px solid var(--gray-200); border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-back:hover { border-color: var(--black); color: var(--black); }
+  .required-note { font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+
+  .success-wrap { text-align: center; padding: 80px 0; }
+  .success-icon { font-size: 48px; margin-bottom: 20px; }
+  .success-wrap h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 10px; }
+  .success-wrap p { font-size: 15px; color: var(--gray-600); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">Podium <span>Educação</span></div>
+</nav>
+
+<div class="test-wrap">
+  <div id="step-intro" class="step active">
+    <div class="test-header">
+      <h1>Seleção de SDR</h1>
+      <p>Antes de avançar para a entrevista, queremos entender melhor o seu perfil. Responda com sinceridade — não existe resposta certa ou errada, e respostas honestas funcionam melhor pra todo mundo.</p>
+    </div>
+    <div class="info-card">
+      <h2>Como funciona a vaga</h2>
+      <p>Você terá um salário fixo de R$4.000 e bônus por agendamentos realizados. A autonomia de horário é total — mas o que importa é resultado. Quem entrega mais, ganha mais.</p>
+    </div>
+    <div class="field-group"><label>Nome completo</label><input type="text" id="nome" placeholder="Seu nome" /></div>
+    <div class="field-group"><label>WhatsApp</label><input type="tel" id="telefone" placeholder="(00) 00000-0000" /></div>
+    <div class="field-group"><label>Como ficou sabendo da vaga?</label><input type="text" id="origem" placeholder="Ex: indicação, Instagram, grupo..." /></div>
+    <div class="btn-row"><div></div><button class="btn-primary" onclick="startTest()">Começar →</button></div>
+  </div>
+
+  <div id="step-questions" class="step">
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span id="prog-text">Pergunta 1 de 20</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    </div>
+    <div id="question-container"></div>
+    <p class="required-note" id="req-note">Por favor, responda antes de continuar.</p>
+    <div class="btn-row">
+      <button class="btn-back" id="btn-back" onclick="prevQ()">← Voltar</button>
+      <button class="btn-primary" onclick="nextQ()">Continuar →</button>
+    </div>
+  </div>
+
+  <div id="step-success" class="step">
+    <div class="success-wrap">
+      <div class="success-icon">✓</div>
+      <h2>Teste enviado!</h2>
+      <p>Obrigado pela participação.<br>Entraremos em contato pelo WhatsApp em breve.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { id:1, section:'Cenários', type:'choice', text:'São 18h30 de sexta. Você bateu apenas 60% da meta de agendamentos da semana. Ninguém vai te cobrar. O que você faz?',
+    options:[
+      {letter:'A',text:'Fico além do horário e continuo prospectando até chegar num número que me satisfaz',pts:3},
+      {letter:'B',text:'Fecho o dia, mas já planejo segunda com foco em recuperar',pts:2},
+      {letter:'C',text:'Registro o que deu errado e ajusto a abordagem para a próxima semana',pts:1},
+      {letter:'D',text:'Foi uma semana difícil — descanso e reinicio fresquinho na segunda',pts:0},
+    ]},
+  { id:2, section:'Cenários', type:'choice', text:'Você já bateu sua meta da semana na quinta-feira. Ainda tem sexta inteira pela frente. O que acontece?',
+    options:[
+      {letter:'A',text:'Continuo prospectando — meta batida é piso, não teto',pts:3},
+      {letter:'B',text:'Faço um dia mais leve mas ainda trabalho',pts:2},
+      {letter:'C',text:'Aproveito para organizar processos e me preparar para a próxima semana',pts:1},
+      {letter:'D',text:'Dou o dia como encerrado — mereci',pts:0},
+    ]},
+  { id:3, section:'Cenários', type:'choice', text:'Você está prospectando no WhatsApp e uma pessoa te ignora por dois dias seguidos. O que você faz?',
+    options:[
+      {letter:'A',text:'Mando follow-up com abordagem completamente diferente — mudo o ângulo da mensagem',pts:3},
+      {letter:'B',text:'Espero mais um dia e mando um lembrete simples',pts:2},
+      {letter:'C',text:'Marco como inativo e parto para o próximo lead',pts:1},
+      {letter:'D',text:'Entendo que não é o momento e não insisto mais',pts:0},
+    ]},
+  { id:4, section:'Cenários', type:'choice', text:'Você tem autonomia total de horário. Como costuma estruturar o seu dia de trabalho?',
+    options:[
+      {letter:'A',text:'Monto blocos fixos de prospecção e cumpro sem negociar comigo mesmo',pts:3},
+      {letter:'B',text:'Sigo o horário comercial padrão com organização conforme o dia pede',pts:2},
+      {letter:'C',text:'Trabalho quando me sinto mais produtivo — varia bastante',pts:1},
+      {letter:'D',text:'Não tenho rotina definida, vou conforme as demandas aparecem',pts:0},
+    ]},
+  { id:5, section:'Cenários', type:'choice', text:'Você está num mês em que o bônus está distante da meta. Faltam 5 dias. O que muda no seu comportamento?',
+    options:[
+      {letter:'A',text:'Aumento o volume e o horário — faço o que for preciso para chegar mais perto',pts:3},
+      {letter:'B',text:'Mantenho o ritmo mas com foco maior nas ações que convertem mais',pts:2},
+      {letter:'C',text:'Aceito que esse mês não vai fechar — foco em aprender para o próximo',pts:1},
+      {letter:'D',text:'O fixo já garante o básico — não vale se estressar',pts:0},
+    ]},
+  { id:6, section:'Valores', type:'scale', text:'"Bater uma meta me dá uma satisfação que vai além do dinheiro — é quase uma questão de orgulho."' },
+  { id:7, section:'Valores', type:'scale', text:'"Me incomoda profundamente terminar o dia sem ter entregado o que planejei."' },
+  { id:8, section:'Valores', type:'scale', text:'"Já fui além do que era exigido em algum trabalho ou projeto por conta própria, sem ninguém pedir."' },
+  { id:9, section:'Valores', type:'scale', text:'"Consigo manter o mesmo ritmo de trabalho nos dias em que ninguém está me monitorando."' },
+  { id:10, section:'Valores', type:'scale', text:'"Quando vejo alguém da equipe entregando mais do que eu, isso me incomoda e me motiva a reagir."' },
+  { id:11, section:'Perfil', type:'open', text:'Descreva um momento em que você trabalhou além do esperado para entregar algo. O que te motivou a não parar?', hint:'Pode ser qualquer contexto — trabalho, estudo, projeto pessoal.' },
+  { id:12, section:'Perfil', type:'open', text:'O que te faz sair da cama com vontade de trabalhar num dia em que a agenda está vazia e ninguém vai te cobrar?', hint:'Sem resposta certa — seja honesto.' },
+  { id:13, section:'Perfil', type:'open', text:'Você já trabalhou com comissão, bônus ou por entrega? Como foi essa experiência para você?', hint:'Se não tiver experiência, conta como imagina que seria.' },
+  { id:14, section:'Perfil', type:'open', text:'Qual é o seu maior ponto fraco quando o assunto é trabalho?', hint:'Seja direto — resposta genérica não ajuda ninguém aqui.' },
+  { id:15, section:'Perfil', type:'open', text:'Em 3 palavras, como pessoas próximas descreveriam você no trabalho?', hint:'Amigos, família, ex-colegas — qualquer pessoa que te conheça bem.' },
+  { id:16, section:'Momento atual', type:'choice', hint:'Isso nos ajuda a entender se a estrutura da vaga faz sentido pra você nesse momento.', text:'Como você descreveria sua situação financeira pessoal agora?',
+    options:[
+      {letter:'A',text:'Estável — tenho reserva e não dependo do salário para cobrir emergências',pts:3,flag:false},
+      {letter:'B',text:'Equilibrada — o salário cobre bem meus gastos com alguma folga',pts:2,flag:false},
+      {letter:'C',text:'Apertada — o salário vai cobrir o necessário mas sem margem',pts:1,flag:true},
+      {letter:'D',text:'Crítica — tenho dívidas ou pressão financeira alta no momento',pts:0,flag:true},
+    ]},
+  { id:17, section:'Momento atual', type:'choice', text:'Como está sua energia e disposição para trabalhar agora, comparado com seus melhores momentos profissionais?',
+    options:[
+      {letter:'A',text:'Estou num dos meus melhores momentos — animado e com tudo a dar',pts:3,flag:false},
+      {letter:'B',text:'Estou bem — com vontade de crescer e provar algo',pts:2,flag:false},
+      {letter:'C',text:'Estou ok — saí de um período difícil e estou me recuperando',pts:1,flag:true},
+      {letter:'D',text:'Estou cansado — preciso de uma vaga que me reequilibre',pts:0,flag:true},
+    ]},
+  { id:18, section:'Momento atual', type:'choice', text:'Tem alguma situação pessoal (família, saúde, mudança) que pode impactar sua disponibilidade nos próximos 3 meses?',
+    options:[
+      {letter:'A',text:'Não — estou 100% disponível e focado',pts:3,flag:false},
+      {letter:'B',text:'Tenho algo pontual mas que não vai interferir no trabalho',pts:2,flag:false},
+      {letter:'C',text:'Tenho algo que pode exigir atenção ocasional',pts:1,flag:true},
+      {letter:'D',text:'Tenho uma situação relevante que precisa de atenção',pts:0,flag:true},
+    ]},
+  { id:19, section:'Momento atual', type:'scale', flagBelow:3, text:'"Neste momento da minha vida, estou disposto a abrir mão de conforto e lazer para focar em crescer profissionalmente."' },
+  { id:20, section:'Momento atual', type:'scale', flagBelow:3, text:'"Estou entrando nessa vaga com a mentalidade de construir algo — não apenas de cumprir horário."' },
+];
+
+let currentQ = 0, answers = {}, candidatoInfo = {};
+
+function getKey() { return 'podium_sdrs_v3'; }
+function getCandidatos() { try { return JSON.parse(localStorage.getItem(getKey()) || '[]'); } catch { return []; } }
+function saveCandidatos(list) { localStorage.setItem(getKey(), JSON.stringify(list)); }
+
+function showStep(id) { document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function startTest() {
+  const nome = document.getElementById('nome').value.trim();
+  const tel = document.getElementById('telefone').value.trim();
+  if (!nome || !tel) { alert('Preencha nome e WhatsApp para continuar.'); return; }
+  candidatoInfo = { nome, telefone: tel, origem: document.getElementById('origem').value.trim() };
+  currentQ = 0; answers = {};
+  showStep('step-questions');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('req-note').style.display = 'none';
+  const pct = Math.round((currentQ / questions.length) * 100);
+  document.getElementById('prog-text').textContent = `Pergunta ${currentQ+1} de ${questions.length}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('btn-back').style.display = currentQ === 0 ? 'none' : '';
+
+  let html = `<div class="q-block"><div class="q-section-tag">${q.section}</div><div class="q-title">${q.text}</div>`;
+  if (q.hint) html += `<div class="q-subtitle">${q.hint}</div>`;
+
+  if (q.type === 'choice') {
+    html += `<div class="options-grid">`;
+    q.options.forEach((opt, i) => {
+      const sel = answers[q.id] === i ? 'selected' : '';
+      html += `<button class="opt-btn ${sel}" onclick="selectOpt(${i})"><span class="opt-letter">${opt.letter}</span><span>${opt.text}</span></button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'scale') {
+    const cur = answers[q.id];
+    html += `<div class="scale-wrap"><div class="scale-labels"><span>Discordo totalmente</span><span>Concordo totalmente</span></div><div class="scale-options">`;
+    [1,2,3,4,5].forEach(v => {
+      html += `<button class="scale-opt ${cur===v?'selected':''}" onclick="selectScale(${v})">${v}</button>`;
+    });
+    html += `</div></div>`;
+  } else {
+    const val = answers[q.id] || '';
+    html += `<textarea class="q-textarea" id="ta-${q.id}" placeholder="Escreva aqui..." oninput="answers[${q.id}]=this.value">${val}</textarea>`;
+  }
+  html += `</div>`;
+  document.getElementById('question-container').innerHTML = html;
+}
+
+function selectOpt(i) { answers[questions[currentQ].id] = i; renderQuestion(); }
+function selectScale(v) { answers[questions[currentQ].id] = v; renderQuestion(); }
+function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+
+function nextQ() {
+  const q = questions[currentQ];
+  const has = answers[q.id] !== undefined && answers[q.id] !== '';
+  if (!has) { document.getElementById('req-note').style.display = 'block'; return; }
+  if (currentQ < questions.length - 1) { currentQ++; renderQuestion(); }
+  else submitTest();
+}
+
+function calcAutoScore() {
+  let pts = 0;
+  questions.forEach(q => {
+    const ans = answers[q.id];
+    if (q.type === 'choice' && ans !== undefined) pts += (q.options[ans].pts || 0);
+    else if (q.type === 'scale' && ans !== undefined) pts += ans;
+  });
+  return pts;
+}
+
+function detectFlags(ans) {
+  const flags = [];
+  const p16 = ans[16]; if (p16 !== undefined && questions[15].options[p16].flag) flags.push('Situação financeira pode gerar pressão ou distração');
+  const p17 = ans[17]; if (p17 !== undefined && questions[16].options[p17].flag) flags.push('Momento de energia baixa — pode impactar ritmo inicial');
+  const p18 = ans[18]; if (p18 !== undefined && questions[17].options[p18].flag) flags.push('Situação pessoal pode comprometer disponibilidade');
+  if (ans[19] !== undefined && ans[19] < 3) flags.push('Baixa disposição declarada para abrir mão de conforto');
+  if (ans[20] !== undefined && ans[20] < 3) flags.push('Não demonstra mentalidade de construção — risco de acomodação');
+  return flags;
+}
+
+function submitTest() {
+  const autoScore = calcAutoScore();
+  const flags = detectFlags(answers);
+  const c = { id: Date.now(), ...candidatoInfo, data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), answers:{...answers}, autoScore, manualScore:null, nota:'', status:'pendente', flags };
+  const list = getCandidatos();
+  list.unshift(c);
+  saveCandidatos(list);
+  showStep('step-success');
+}
+</script>
+</body>
+</html>

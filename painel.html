@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — Podium Educação</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #111; --white: #fafaf8; --gray-100: #f4f3f0; --gray-200: #e8e7e2;
+    --gray-400: #999890; --gray-600: #666560; --green: #1a5c38; --green-light: #d4eddf;
+    --amber: #7a4d00; --amber-light: #fdecc8; --red: #8b1a1a; --red-light: #fde8e8; --accent: #c8430a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .login-box {
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: 16px;
+    padding: 40px; width: 100%; max-width: 380px; text-align: center;
+  }
+  .login-box h1 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .login-box p { font-size: 14px; color: var(--gray-600); margin-bottom: 28px; }
+  .login-box input {
+    width: 100%; padding: 12px 16px; border: 1px solid var(--gray-200); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; margin-bottom: 12px;
+    background: var(--white); color: var(--black); text-align: center; letter-spacing: 2px;
+  }
+  .login-box input:focus { outline: none; border-color: var(--black); }
+  .login-btn {
+    width: 100%; padding: 13px; background: var(--black); color: var(--white); border: none;
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-error { font-size: 13px; color: var(--red); margin-top: 10px; display: none; }
+
+  /* PAINEL */
+  #painel { display: none; }
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--gray-200);
+    background: var(--white); position: sticky; top: 0; z-index: 100;
+  }
+  .nav-brand { font-family: 'DM Serif Display', serif; font-size: 18px; }
+  .nav-brand span { color: var(--accent); }
+  .logout-btn {
+    font-size: 13px; padding: 7px 16px; border: 1px solid var(--gray-200);
+    border-radius: 20px; cursor: pointer; background: transparent; color: var(--gray-600); transition: all 0.15s;
+  }
+  .logout-btn:hover { border-color: var(--black); color: var(--black); }
+
+  .painel-wrap { padding: 40px 32px; max-width: 1100px; margin: 0 auto; }
+  .painel-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+  .painel-top h2 { font-family: 'DM Serif Display', serif; font-size: 26px; }
+  .painel-top p { font-size: 14px; color: var(--gray-600); margin-top: 4px; }
+
+  .stats-row { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .stat-card { background: var(--gray-100); border-radius: 10px; padding: 16px 20px; min-width: 140px; }
+  .stat-label { font-size: 12px; color: var(--gray-600); margin-bottom: 4px; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 28px; }
+  .stat-num.green { color: var(--green); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.red { color: var(--red); }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 14px; border: 1px solid var(--gray-200); border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer;
+    background: var(--white); color: var(--gray-600); transition: all 0.12s;
+  }
+  .filter-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+  .candidatos-table { width: 100%; border-collapse: collapse; }
+  .candidatos-table th { text-align: left; font-size: 11px; font-weight: 500; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; border-bottom: 1px solid var(--gray-200); }
+  .candidatos-table td { padding: 14px 12px; font-size: 14px; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
+  .candidatos-table tr:hover td { background: var(--gray-100); }
+
+  .status-pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .pill-avancar { background: var(--green-light); color: var(--green); }
+  .pill-reserva { background: var(--amber-light); color: var(--amber); }
+  .pill-eliminar { background: var(--red-light); color: var(--red); }
+  .pill-pendente { background: var(--gray-200); color: var(--gray-600); }
+
+  .flag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; }
+  .flag-amber { background: var(--amber-light); color: var(--amber); }
+
+  .pts-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .pts-bar-track { flex: 1; height: 4px; background: var(--gray-200); border-radius: 2px; min-width: 60px; }
+  .pts-bar-fill { height: 4px; border-radius: 2px; background: var(--accent); }
+
+  .ver-btn { font-size: 12px; padding: 5px 12px; border: 1px solid var(--gray-200); border-radius: 6px; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--black); transition: all 0.12s; }
+  .ver-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+  .empty-state { text-align: center; padding: 60px 0; color: var(--gray-400); font-size: 14px; }
+
+  .btn-primary { padding: 13px 28px; background: var(--black); color: var(--white); border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-primary:hover { opacity: 0.85; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; overflow-y: auto; padding: 40px 20px; }
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+  .modal-box { background: var(--white); border-radius: 14px; padding: 32px; max-width: 660px; width: 100%; }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 22px; }
+  .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-400); line-height: 1; }
+  .modal-score { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-200); }
+  .modal-score-num { font-family: 'DM Serif Display', serif; font-size: 40px; }
+  .modal-score-sub { font-size: 13px; color: var(--gray-600); }
+  .modal-section { margin-bottom: 20px; }
+  .modal-section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-400); margin-bottom: 10px; }
+  .modal-qa { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-200); }
+  .modal-qa:last-child { border-bottom: none; }
+  .modal-q { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .modal-a { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+  .modal-pts { font-size: 11px; color: var(--accent); margin-left: 6px; }
+  .modal-flag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; margin-left: 6px; background: var(--amber-light); color: var(--amber); }
+
+  .alerta-box { background: var(--amber-light); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: var(--amber); line-height: 1.6; }
+  .alerta-box strong { display: block; margin-bottom: 4px; }
+
+  .nota-input { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; resize: vertical; margin-top: 6px; }
+  .nota-input:focus { outline: none; border-color: var(--black); }
+  .save-nota-btn { margin-top: 8px; padding: 8px 18px; background: var(--black); color: var(--white); border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .score-override { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .score-override label { font-size: 13px; color: var(--gray-600); }
+  .score-override input[type=number] { width: 70px; padding: 6px 10px; border: 1px solid var(--gray-200); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; }
+
+  .guia-box { background: var(--gray-100); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .guia-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 10px; }
+  .guia-item { font-size: 12px; color: var(--gray-600); margin-bottom: 6px; line-height: 1.5; }
+  .guia-item strong { color: var(--black); }
+
+  @media (max-width: 600px) {
+    nav { padding: 14px 16px; }
+    .painel-wrap { padding: 24px 16px; }
+    .candidatos-table th:nth-child(3), .candidatos-table td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login">
+  <div class="login-box">
+    <h1>Podium <span style="color:#c8430a">Educação</span></h1>
+    <p>Acesso restrito — painel de gestão</p>
+    <input type="password" id="senha-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')tentarLogin()" />
+    <button class="login-btn" onclick="tentarLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="painel">
+  <nav>
+    <div class="nav-brand">Podium <span>Educação</span> — <span style="font-size:14px;color:var(--gray-600);font-family:'DM Sans',sans-serif">Painel de Gestão</span></div>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </nav>
+
+  <div class="painel-wrap">
+    <div class="painel-top">
+      <div><h2>Candidatos</h2><p>Resultado do teste de perfil SDR</p></div>
+      <button class="btn-primary" onclick="exportCSV()">Exportar CSV</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-num" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Avançar</div><div class="stat-num green" id="stat-avancar">0</div></div>
+      <div class="stat-card"><div class="stat-label">Reserva</div><div class="stat-num amber" id="stat-reserva">0</div></div>
+      <div class="stat-card"><div class="stat-label">Eliminar</div><div class="stat-num red" id="stat-eliminar">0</div></div>
+      <div class="stat-card"><div class="stat-label">Com alerta</div><div class="stat-num amber" id="stat-flags">0</div></div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('avancar',this)">Avançar</button>
+      <button class="filter-btn" onclick="setFilter('reserva',this)">Reserva</button>
+      <button class="filter-btn" onclick="setFilter('eliminar',this)">Eliminar</button>
+      <button class="filter-btn" onclick="setFilter('pendente',this)">Pendente</button>
+      <button class="filter-btn" onclick="setFilter('flag',this)">Com alerta</button>
+    </div>
+    <div id="tabela-container"><div class="empty-state">Nenhum candidato ainda.</div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="modal-nome">—</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-score">
+      <div><div class="modal-score-num" id="modal-pts">—</div><div class="modal-score-sub">pontos automáticos (máx 40)</div></div>
+      <div style="flex:1"><div id="modal-status-pill"></div><div style="margin-top:8px;font-size:13px;color:var(--gray-600)" id="modal-info"></div></div>
+    </div>
+    <div id="modal-alerta"></div>
+    <div id="modal-content"></div>
+    <div class="modal-section" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-200)">
+      <div class="modal-section-title">Sua avaliação das respostas abertas (0–25 pts)</div>
+      <div class="guia-box">
+        <div class="guia-title">Critério de avaliação</div>
+        <div class="guia-item"><strong>P11 (0–5):</strong> Episódio real + motivação interna = 5 · Motivação externa (medo) = 3 · Sem episódio concreto = 0</div>
+        <div class="guia-item"><strong>P12 (0–5):</strong> Cita dinheiro, competição, desafio, bater meta = 5 · Resposta genérica = 2 · Não sabe/desvia = 0</div>
+        <div class="guia-item"><strong>P13 (0–5):</strong> Exp. real com bônus e fala bem = 5 · Sem exp. mas contexto positivo = 3 · Prefere fixo ou fala mal = 1</div>
+        <div class="guia-item"><strong>P14 (0–5):</strong> Ponto fraco real + como lida = 5 · Fraqueza disfarçada de qualidade = 1 · Vago = 2</div>
+        <div class="guia-item"><strong>P15 (0–5):</strong> Determinado, competitivo, focado, ambicioso = 5 · Organizado, responsável = 3 · Tranquilo, calmo = 1</div>
+      </div>
+      <div class="score-override">
+        <label>Pontos das abertas:</label>
+        <input type="number" id="override-input" min="0" max="25" placeholder="0–25" />
+      </div>
+      <textarea class="nota-input" id="nota-input" placeholder="Suas anotações sobre o candidato..."></textarea>
+      <button class="save-nota-btn" onclick="saveNota()">Salvar avaliação</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SENHA = 'BC681731@';
+const questions = [
+  { id:1, section:'Cenários', type:'choice', text:'São 18h30 de sexta. Você bateu apenas 60% da meta de agendamentos da semana. Ninguém vai te cobrar. O que você faz?', options:[{letter:'A',text:'Fico além do horário e continuo prospectando até chegar num número que me satisfaz',pts:3},{letter:'B',text:'Fecho o dia, mas já planejo segunda com foco em recuperar',pts:2},{letter:'C',text:'Registro o que deu errado e ajusto a abordagem para a próxima semana',pts:1},{letter:'D',text:'Foi uma semana difícil — descanso e reinicio fresquinho na segunda',pts:0}]},
+  { id:2, section:'Cenários', type:'choice', text:'Você já bateu sua meta da semana na quinta-feira. Ainda tem sexta inteira pela frente. O que acontece?', options:[{letter:'A',text:'Continuo prospectando — meta batida é piso, não teto',pts:3},{letter:'B',text:'Faço um dia mais leve mas ainda trabalho',pts:2},{letter:'C',text:'Aproveito para organizar processos e me preparar para a próxima semana',pts:1},{letter:'D',text:'Dou o dia como encerrado — mereci',pts:0}]},
+  { id:3, section:'Cenários', type:'choice', text:'Você está prospectando no WhatsApp e uma pessoa te ignora por dois dias seguidos. O que você faz?', options:[{letter:'A',text:'Mando follow-up com abordagem completamente diferente — mudo o ângulo da mensagem',pts:3},{letter:'B',text:'Espero mais um dia e mando um lembrete simples',pts:2},{letter:'C',text:'Marco como inativo e parto para o próximo lead',pts:1},{letter:'D',text:'Entendo que não é o momento e não insisto mais',pts:0}]},
+  { id:4, section:'Cenários', type:'choice', text:'Você tem autonomia total de horário. Como costuma estruturar o seu dia de trabalho?', options:[{letter:'A',text:'Monto blocos fixos de prospecção e cumpro sem negociar comigo mesmo',pts:3},{letter:'B',text:'Sigo o horário comercial padrão com organização conforme o dia pede',pts:2},{letter:'C',text:'Trabalho quando me sinto mais produtivo — varia bastante',pts:1},{letter:'D',text:'Não tenho rotina definida, vou conforme as demandas aparecem',pts:0}]},
+  { id:5, section:'Cenários', type:'choice', text:'Você está num mês em que o bônus está distante da meta. Faltam 5 dias. O que muda no seu comportamento?', options:[{letter:'A',text:'Aumento o volume e o horário — faço o que for preciso para chegar mais perto',pts:3},{letter:'B',text:'Mantenho o ritmo mas com foco maior nas ações que convertem mais',pts:2},{letter:'C',text:'Aceito que esse mês não vai fechar — foco em aprender para o próximo',pts:1},{letter:'D',text:'O fixo já garante o básico — não vale se estressar',pts:0}]},
+  { id:6, section:'Valores', type:'scale', text:'"Bater uma meta me dá uma satisfação que vai além do dinheiro — é quase uma questão de orgulho."' },
+  { id:7, section:'Valores', type:'scale', text:'"Me incomoda profundamente terminar o dia sem ter entregado o que planejei."' },
+  { id:8, section:'Valores', type:'scale', text:'"Já fui além do que era exigido em algum trabalho ou projeto por conta própria, sem ninguém pedir."' },
+  { id:9, section:'Valores', type:'scale', text:'"Consigo manter o mesmo ritmo de trabalho nos dias em que ninguém está me monitorando."' },
+  { id:10, section:'Valores', type:'scale', text:'"Quando vejo alguém da equipe entregando mais do que eu, isso me incomoda e me motiva a reagir."' },
+  { id:11, section:'Perfil', type:'open', text:'Descreva um momento em que você trabalhou além do esperado para entregar algo. O que te motivou a não parar?' },
+  { id:12, section:'Perfil', type:'open', text:'O que te faz sair da cama com vontade de trabalhar num dia em que a agenda está vazia e ninguém vai te cobrar?' },
+  { id:13, section:'Perfil', type:'open', text:'Você já trabalhou com comissão, bônus ou por entrega? Como foi essa experiência para você?' },
+  { id:14, section:'Perfil', type:'open', text:'Qual é o seu maior ponto fraco quando o assunto é trabalho?' },
+  { id:15, section:'Perfil', type:'open', text:'Em 3 palavras, como pessoas próximas descreveriam você no trabalho?' },
+  { id:16, section:'Momento atual', type:'choice', text:'Como você descreveria sua situação financeira pessoal agora?', options:[{letter:'A',text:'Estável — tenho reserva e não dependo do salário para cobrir emergências',pts:3,flag:false},{letter:'B',text:'Equilibrada — o salário cobre bem meus gastos com alguma folga',pts:2,flag:false},{letter:'C',text:'Apertada — o salário vai cobrir o necessário mas sem margem',pts:1,flag:true},{letter:'D',text:'Crítica — tenho dívidas ou pressão financeira alta no momento',pts:0,flag:true}]},
+  { id:17, section:'Momento atual', type:'choice', text:'Como está sua energia e disposição para trabalhar agora, comparado com seus melhores momentos profissionais?', options:[{letter:'A',text:'Estou num dos meus melhores momentos — animado e com tudo a dar',pts:3,flag:false},{letter:'B',text:'Estou bem — com vontade de crescer e provar algo',pts:2,flag:false},{letter:'C',text:'Estou ok — saí de um período difícil e estou me recuperando',pts:1,flag:true},{letter:'D',text:'Estou cansado — preciso de uma vaga que me reequilibre',pts:0,flag:true}]},
+  { id:18, section:'Momento atual', type:'choice', text:'Tem alguma situação pessoal que pode impactar sua disponibilidade nos próximos 3 meses?', options:[{letter:'A',text:'Não — estou 100% disponível e focado',pts:3,flag:false},{letter:'B',text:'Tenho algo pontual mas que não vai interferir no trabalho',pts:2,flag:false},{letter:'C',text:'Tenho algo que pode exigir atenção ocasional',pts:1,flag:true},{letter:'D',text:'Tenho uma situação relevante que precisa de atenção',pts:0,flag:true}]},
+  { id:19, section:'Momento atual', type:'scale', flagBelow:3, text:'"Neste momento da minha vida, estou disposto a abrir mão de conforto e lazer para focar em crescer profissionalmente."' },
+  { id:20, section:'Momento atual', type:'scale', flagBelow:3, text:'"Estou entrando nessa vaga com a mentalidade de construir algo — não apenas de cumprir horário."' },
+];
+
+let activeFilter = 'todos', modalIndex = null;
+
+function getKey() { return 'podium_sdrs_v3'; }
+function getCandidatos() { try { return JSON.parse(localStorage.getItem(getKey()) || '[]'); } catch { return []; } }
+function saveCandidatos(list) { localStorage.setItem(getKey(), JSON.stringify(list)); }
+
+function tentarLogin() {
+  const val = document.getElementById('senha-input').value;
+  if (val === SENHA) {
+    sessionStorage.setItem('painel_auth', '1');
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('painel').style.display = 'block';
+    renderPainel();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('senha-input').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('painel_auth');
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('painel').style.display = 'none';
+}
+
+window.onload = function() {
+  if (sessionStorage.getItem('painel_auth') === '1') {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('painel').style.display = 'block';
+    renderPainel();
+  }
+};
+
+function getStatus(auto, manual) {
+  const total = auto + (manual || 0);
+  if (manual === null || manual === undefined) return 'pendente';
+  if (total >= 48) return 'avancar';
+  if (total >= 34) return 'reserva';
+  return 'eliminar';
+}
+
+function renderPainel() {
+  const list = getCandidatos();
+  let filtered = activeFilter === 'flag' ? list.filter(c => c.flags && c.flags.length > 0) : activeFilter === 'todos' ? list : list.filter(c => c.status === activeFilter);
+
+  document.getElementById('stat-total').textContent = list.length;
+  document.getElementById('stat-avancar').textContent = list.filter(c => c.status === 'avancar').length;
+  document.getElementById('stat-reserva').textContent = list.filter(c => c.status === 'reserva').length;
+  document.getElementById('stat-eliminar').textContent = list.filter(c => c.status === 'eliminar').length;
+  document.getElementById('stat-flags').textContent = list.filter(c => c.flags && c.flags.length > 0).length;
+
+  const cont = document.getElementById('tabela-container');
+  if (!filtered.length) { cont.innerHTML = '<div class="empty-state">Nenhum candidato encontrado.</div>'; return; }
+
+  let html = `<table class="candidatos-table"><thead><tr><th>Candidato</th><th>Pts auto</th><th>Total</th><th>Status</th><th>Alertas</th><th>Data</th><th></th></tr></thead><tbody>`;
+  filtered.forEach(c => {
+    const realIdx = list.findIndex(x => x.id === c.id);
+    const total = c.autoScore + (c.manualScore || 0);
+    const pillClass = {avancar:'pill-avancar',reserva:'pill-reserva',eliminar:'pill-eliminar',pendente:'pill-pendente'}[c.status];
+    const pillText = {avancar:'Avançar',reserva:'Reserva',eliminar:'Eliminar',pendente:'Pendente'}[c.status];
+    const flagsHtml = c.flags && c.flags.length > 0 ? `<span class="flag flag-amber">${c.flags.length} alerta${c.flags.length>1?'s':''}</span>` : '<span style="font-size:12px;color:var(--gray-400)">—</span>';
+    html += `<tr><td><div style="font-weight:500">${c.nome}</div><div style="font-size:12px;color:var(--gray-400)">${c.telefone}</div></td>
+      <td><div class="pts-bar-wrap"><span style="font-weight:500;min-width:28px">${c.autoScore}</span><div class="pts-bar-track"><div class="pts-bar-fill" style="width:${Math.round((c.autoScore/40)*100)}%"></div></div></div></td>
+      <td style="font-weight:500">${c.manualScore!==null?total:'—'}</td>
+      <td><span class="status-pill ${pillClass}">${pillText}</span></td>
+      <td>${flagsHtml}</td>
+      <td style="font-size:13px;color:var(--gray-600)">${c.data} ${c.hora}</td>
+      <td><button class="ver-btn" onclick="openModal(${realIdx})">Ver →</button></td></tr>`;
+  });
+  html += '</tbody></table>';
+  cont.innerHTML = html;
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPainel();
+}
+
+function openModal(idx) {
+  modalIndex = idx;
+  const list = getCandidatos();
+  const c = list[idx];
+  if (!c) return;
+  const scaleLabels = ['','Discordo totalmente','Discordo','Neutro','Concordo','Concordo totalmente'];
+  document.getElementById('modal-nome').textContent = c.nome;
+  document.getElementById('modal-pts').textContent = c.autoScore;
+  document.getElementById('modal-info').textContent = `${c.telefone} · ${c.origem||'origem não informada'} · ${c.data}`;
+  const total = c.autoScore + (c.manualScore||0);
+  const pillClass = {avancar:'pill-avancar',reserva:'pill-reserva',eliminar:'pill-eliminar',pendente:'pill-pendente'}[c.status];
+  const pillText = {avancar:'Avançar',reserva:'Reserva',eliminar:'Eliminar',pendente:'Avaliação pendente'}[c.status];
+  document.getElementById('modal-status-pill').innerHTML = `<span class="status-pill ${pillClass}">${pillText}</span>${c.manualScore!==null?` <span style="font-size:13px;color:var(--gray-600);margin-left:8px">Total: ${total} pts</span>`:''}`;
+  let alertaHtml = '';
+  if (c.flags && c.flags.length > 0) { alertaHtml = `<div class="alerta-box"><strong>Sinais de alerta — momento de vida</strong>`; c.flags.forEach(f => { alertaHtml += `<div>• ${f}</div>`; }); alertaHtml += `</div>`; }
+  document.getElementById('modal-alerta').innerHTML = alertaHtml;
+
+  let html = '';
+  html += `<div class="modal-section"><div class="modal-section-title">Cenários</div>`;
+  questions.filter(q=>q.type==='choice'&&q.id<=5).forEach(q => {
+    const ans = c.answers[q.id]; const opt = q.options[ans];
+    html += `<div class="modal-qa"><div class="modal-q">${q.text}<span class="modal-pts">+${opt?opt.pts:0} pts</span></div><div class="modal-a">${opt?opt.text:'—'}</div></div>`;
+  });
+  html += `</div>`;
+  html += `<div class="modal-section"><div class="modal-section-title">Valores</div>`;
+  questions.filter(q=>q.type==='scale'&&q.id<=10).forEach(q => {
+    const val = c.answers[q.id];
+    html += `<div class="modal-qa"><div class="modal-q">${q.text}<span class="modal-pts">+${val||0} pts</span></div><div class="modal-a">${scaleLabels[val]||'—'}</div></div>`;
+  });
+  html += `</div>`;
+  html += `<div class="modal-section"><div class="modal-section-title">Respostas abertas</div>`;
+  questions.filter(q=>q.type==='open').forEach(q => {
+    html += `<div class="modal-qa"><div class="modal-q">${q.text}</div><div class="modal-a">${c.answers[q.id]||'—'}</div></div>`;
+  });
+  html += `</div>`;
+  html += `<div class="modal-section"><div class="modal-section-title">Momento de vida</div>`;
+  questions.filter(q=>q.id>=16).forEach(q => {
+    let resposta = '—';
+    if (q.type==='choice'&&c.answers[q.id]!==undefined) resposta = q.options[c.answers[q.id]].text;
+    else if (q.type==='scale'&&c.answers[q.id]!==undefined) resposta = `${c.answers[q.id]} — ${scaleLabels[c.answers[q.id]]}`;
+    const isFlag = (q.type==='choice'&&c.answers[q.id]!==undefined&&q.options[c.answers[q.id]].flag)||(q.type==='scale'&&c.answers[q.id]!==undefined&&q.flagBelow&&c.answers[q.id]<q.flagBelow);
+    html += `<div class="modal-qa"><div class="modal-q">${q.text}${isFlag?'<span class="modal-flag">alerta</span>':''}</div><div class="modal-a">${resposta}</div></div>`;
+  });
+  html += `</div>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('override-input').value = c.manualScore!==null?c.manualScore:'';
+  document.getElementById('nota-input').value = c.nota||'';
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); modalIndex = null; }
+function closeModalOutside(e) { if (e.target===document.getElementById('modal')) closeModal(); }
+
+function saveNota() {
+  if (modalIndex===null) return;
+  const list = getCandidatos();
+  const c = list[modalIndex];
+  const raw = document.getElementById('override-input').value;
+  const manual = raw!==''?Math.min(25,Math.max(0,parseInt(raw)||0)):null;
+  c.manualScore = manual; c.nota = document.getElementById('nota-input').value;
+  c.status = getStatus(c.autoScore, manual);
+  saveCandidatos(list); closeModal(); renderPainel();
+}
+
+function exportCSV() {
+  const list = getCandidatos();
+  if (!list.length) { alert('Nenhum candidato para exportar.'); return; }
+  const headers = ['Nome','Telefone','Origem','Data','Hora','Pts Auto','Pts Manual','Total','Status','Alertas','Nota'];
+  const rows = list.map(c => [c.nome,c.telefone,c.origem||'',c.data,c.hora,c.autoScore,c.manualScore??'',c.autoScore+(c.manualScore||0),c.status,(c.flags||[]).join(' | '),(c.nota||'').replace(/,/g,';')]);
+  const csv = [headers,...rows].map(r=>r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'candidatos-sdr-podium.csv'; a.click();
+}
+</script>
+</body>
+</html>
